@@ -1,0 +1,451 @@
+Leetecode Cheat Sheet:
+
+Input Array is Sorted - Binary Search: O(log n) - Two Pointers: O(n)
+Input is a Binary Tree - DFS (Preorder, Inorder, Postorder): O(n) - BFS (Level Order): O(n)
+Input is a Binary Search Tree - Left < Cur < Right: O(log n) - Inorder Traversal visits the nodes in ascending (sorted) order: O(n)
+Input is a Matrix/Graph - DFS (Recursion, Stack): O(n) - BFS (Queue): O(n)
+Find the Shortest/Nearest Path/Distance in a Tree/Matrix/Graph - BFS (non-weighted): O(n) - Dijkstra (weighted): O(E log V)
+String Concatenation - StringBuilder: O(n) (Java, C#, etc.) - String.join(): O(n) (Python)
+Input is a Linked List - Dummy Node - Two Pointers: O(n) - Fast & Slow Pointers: O(n)
+Recomputing the Same Input - Memoization
+Recursion is Banned - Stack
+Permutations/Combinations/Subsets - Backtracking
+Find the Top/Least Kth element - QuickSelect: O(n) average, O(n²) worst - Heap: O(n log k)
+Common Strings - Map - Trie
+Sort - Quick Sort: O(n log n) average, O(n²) worst - Merge Sort: O(n log n) - Built-in sorts: O(n log n)
+Find the Smallest/Largest/Median in a Stream - Two Heaps
+Must Solve In-Place - Swap corresponding values - Store different values in the same pointer
+Maximum/Minimum Subarray/Subset/Options - Dynamic Programming
+Map/Set - Time: O(1) - Space: O(n)
+Deque - Replaces Stack, Queue, and LinkedList
+
+
+
+
+Binary Search
+def binarySearch(nums: List[int], target: int) -> int:
+    l, r = 0, len(nums)
+    while l < r :
+        m = (l + r) // 2;
+        if nums[m] < target:
+            l = m + 1;
+        else: 
+            r = m;
+    return l;
+
+nums = [1, 2, 3, 3, 3, 6, 9];
+
+# target exists
+# returns the leftmost index
+
+
+Left Most Binary Search
+def searchRange(self, nums: List[int], target: int) -> List[int]:
+    def binarySearch(nums: List[int], target: int) -> int:
+        l, r = 0, len(nums)
+        while (l < r):
+            m = (l + r) // 2
+            if nums[m] < target:
+                l = m + 1
+            else:
+                r = m
+        return l
+
+    l = binarySearch(nums, target)
+    # target does not exist. No need to look for the last position.
+    if l == len(nums) or nums[l] != target:
+        return [-1, -1]
+    # look for the index of target + 1
+    r = binarySearch(nums, target + 1)
+    # last position is r - 1. 
+    return [l, r - 1]
+
+·  check whether the target exists.      arr[binarySearch(arr, 2)] == 2
+·  find the leftmost index of the target if it exists.      binarySearch(arr, 3) = 2     binarySearch(arr, 9) = 6
+·  find the index of where the target should be if it doesn't exist.      binarySearch(arr, 4) = 5     binarySearch(arr, -5) = 0     binarySearch(arr, 100) = 7
+
+
+Binary Tree Traversal
+
+DFS
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def preorder(root: TreeNode):
+    if not root: return
+    print(root.val, end = " ")
+    inorder(root.left)
+    inorder(root.right)
+
+def inorder(root: TreeNode):
+    if not root: return
+    inorder(root.left)
+    print(root.val, end = " ")
+    inorder(root.right)
+    
+def postorder(root: TreeNode):
+    if not root: return
+    postorder(root.left)
+    postorder(root.right)
+    print(root.val, end = " ")
+    
+BFS
+
+def levelorder(root: TreeNode):
+    if not root: return
+    q = deque([root])
+    while q:
+        size = len(q)
+        for i in range(size):
+            node = q.popleft()
+            print(str(node.val), end = " ")
+            if node.left: q.append(node.left)
+            if node.right: q.append(node.right)
+        print(“")
+
+
+Matrix Traversal:
+
+def dfs(grid: List[List[int]], i: int, j: int, visited: Set[List[int]]):
+    if i < 0 or j < 0 or i >= len(grid) or j >= len(grid[0]) or (i, j) in visited: return
+    
+    print(grid[i][j], end = " ")
+    visited.add((i, j))
+    dfs(grid, i + 1, j, visited)
+    dfs(grid, i - 1, j, visited)
+    dfs(grid, i, j + 1, visited)
+    dfs(grid, i, j - 1, visited)
+
+dirs = [ [0,1], [0,-1], [1,0], [-1,0] ]
+def bfs(grid: List[List[int]], _i: int, _j: int):
+    q = deque([[_i, _j]])
+    visited = set([(_i, _j)])
+    
+    while q:
+        cur = q.popleft()
+        print(grid[cur[0]][cur[1]], end = " ")
+        for dir in dirs:
+            i = cur[0] + dir[0]
+            j = cur[1] + dir[1]
+            if i < 0 or j < 0 or i >= len(grid) or j >= len(grid[0]) or (i, j) in visited: continue
+            visited.add((i, j))
+            q.append([i, j])
+
+grid = [
+    [ 1, 2, 3 ],
+    [ 4, 5, 6 ],
+    [ 7, 8, 9 ],
+]
+
+print("DFS: ", end = "")
+dfs(grid, 0, 0, set())
+print()
+print("BFS: ", end = "")
+bfs(grid, 0, 0)
+
+Graph Traversa:
+graph = {
+    0 : [1,6],
+    1 : [0,2,3],
+    2 : [1,4],
+    3 : [1,4,5],
+    4 : [2,3,5],
+    5 : [3,4],
+    6 : [0]
+}
+
+def dfs(graph: Dict[int, List[int]], cur: int, visited: Set[int]):
+    if cur in visited: return
+    visited.add(cur)
+    print(cur, end = " ");
+    for next in graph[cur]:
+        dfs(graph, next, visited)
+        
+def bfs(graph: Dict[int, List[int]], node: int):
+    q = deque([node])
+    visited = set([node])
+
+    while q:
+        cur = q.popleft()
+        print(cur, end = " ")
+        for next in graph[cur]:
+            if next in visited: continue
+            q.append(next)
+            visited.add(next)
+
+"""
+            1 - 0 - 6
+           / \
+          2   3
+           \ / \
+            4 - 5  
+"""
+
+print("DFS: ", end = "")
+dfs(graph, 2, set())
+print()
+print("BFS: ", end = "")
+bfs(graph, 2)
+
+StringBuilder def useStringJoin(n: int) -> float:
+    list = []
+    for i in range(n):
+        list.append("num");
+    test = "".join(list)
+    return end - start
+
+LinkedList:
+
+class ListNode:
+    def __init__(self, val = 0, next = None):
+        self.val = val
+        self.next = next
+        
+# before: 1-2-3-4-5-6-7
+head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5, ListNode(6, ListNode(7)))))))
+slow, fast, dummy = head, head, ListNode(0, head)
+
+while fast and fast.next:
+    slow = slow.next;
+    fast = fast.next.next;
+
+#        d h     s     f
+# after: 0-1-2-3-4-5-6-7
+print("dummy: " + str(dummy.val))
+print("head : " + str(head.val))
+print("slow : " + str(slow.val))
+print("fast : " + str(fast.val))
+
+QuickSelect:
+def findKthLargest(nums: List[int], k: int) -> int:
+    def quickSelect(nums: List[int], l: int, r: int, k: int) -> int:
+        p = partition(nums, l, r, k)
+        if p < k:
+            return quickSelect(nums, p + 1, r, k)
+        if p > k:
+            return quickSelect(nums, l, p - 1, k)
+
+        return nums[p]
+
+    def partition(nums: List[int], l: int, r: int, k: int) -> int:
+        pivot, p = nums[r], r
+
+        i = l
+        while i < p:
+            if nums[i] > pivot:
+                nums[i], nums[p - 1] = nums[p - 1], nums[i]
+                nums[p], nums[p - 1] = nums[p - 1], nums[p]
+                i -= 1
+                p -= 1
+            i += 1
+
+        return p
+    
+    return quickSelect(nums, 0, len(nums) - 1, len(nums) - k)
+
+nums = [2, 8, 5, 1, 4, 6, 7, 3, 0, 9]
+for k in range(1,10):
+    kthLargest = findKthLargest(nums, k)
+    suffix = "st" if (k == 1) else "nd" if (k == 2) else "rd" if (k == 3) else "th"
+    print(str(k) + suffix + " largest = " + str(nums[kthLargest]))
+
+Trie:
+class TrieNode:
+    def __init__(self):
+        self.isWord = False
+        self.nodes = {}
+            
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    # Inserts a word into the trie.
+    def insert(self, word: str) -> None:
+        cur = self.root;
+        for c in word:
+            if c not in cur.nodes:
+                cur.nodes[c] = TrieNode()
+            cur = cur.nodes[c]
+        cur.isWord = True;
+
+    # Returns if the word is in the trie
+    def search(self, word: str) -> bool:
+        cur = self.root
+        for c in word:
+            if c not in cur.nodes:
+                return False
+            cur = cur.nodes[c]
+        return cur.isWord
+
+    # Returns if there is any word in the trie that starts with the given prefix. */
+    def startsWith(self, prefix: str) -> bool:
+        cur = self.root
+        for c in prefix:
+            if c not in cur.nodes:
+                return False
+            cur = cur.nodes[c]
+        return True
+
+trie = Trie()
+dictionary = [ "pirate", "king", "leetcode", "cheat", "sheet"]
+for word in dictionary:
+    trie.insert(word)
+
+print("=== check whether words exist in the trie ===")
+searchWords = ["pirate", "king", "leetcode", "cheat", "sheet", "abc", "apple", "faang", "google"]
+for word in searchWords:
+    print(word + " exists: " + str(trie.search(word)))
+
+print("=== check if there's any word that starts with the given prefix in the trie ===")
+
+startsWithWords = ["p", "kin", "leet", "cheeze", "shell", "faang"]
+for prefix in startsWithWords:
+    print("prefix " + prefix + ": " + str(trie.startsWith(prefix)))
+
+Sort
+MergeSort
+def msort(nums: List[int]) -> None:
+    def msort_helper(nums: List[int], l: int, r: int) -> None:
+        if l >= r: return
+
+        m = (l + r) // 2
+        msort_helper(nums, l, m)
+        msort_helper(nums, m + 1, r)
+        merge(nums, l, r)
+
+    def merge(nums: List[int], l: int, r: int) -> None:
+        m = (l + r) // 2
+        i, j = l, m + 1
+        list = []
+
+        for k in range(r - l + 1):
+            if j > r or (i <= m and nums[i] < nums[j]): 
+                list.append(nums[i])
+                i += 1
+            else: 
+                list.append(nums[j])
+                j += 1
+
+        for k in range(len(list)):
+            nums[l] = list[k]
+            l += 1
+            
+    msort_helper(nums, 0, len(nums) - 1)
+
+nums = [2, 8, 5, 1, 4, 6, 7, 3, 0, 9]
+print("===== before =====")
+print(nums)
+msort(nums)
+print("===== after =====")
+print(nums)
+
+
+QuickSort
+def qsort(nums: List[int]) -> None:
+    def qsort_helper(nums: List[int], l: int, r: int) -> None:
+        if l >= r: return
+
+        p = partition(nums, l, r)
+        qsort_helper(nums, l, p - 1)
+        qsort_helper(nums, p + 1, r)
+
+    def partition(nums: List[int], l: int, r: int) -> int:
+        pivot, p = nums[r], r
+
+        i = l
+        while i < p:
+            if nums[i] > pivot: 
+                nums[i], nums[p - 1] = nums[p - 1], nums[i]
+                nums[p], nums[p - 1] = nums[p - 1], nums[p]
+                i -= 1
+                p -= 1
+            i += 1
+
+        return p
+    
+    qsort_helper(nums, 0, len(nums) - 1)
+
+nums = [2, 8, 5, 1, 4, 6, 7, 3, 0, 9]
+print("===== before =====")
+print(nums)
+qsort(nums)
+print("===== after =====")
+print(nums)
+
+
+QuickSelect
+def findKthLargest(nums: List[int], k: int) -> int:
+    def quickSelect(nums: List[int], l: int, r: int, k: int) -> int:
+        p = partition(nums, l, r, k)
+        if p < k:
+            return quickSelect(nums, p + 1, r, k)
+        if p > k:
+            return quickSelect(nums, l, p - 1, k)
+
+        return nums[p]
+
+    def partition(nums: List[int], l: int, r: int, k: int) -> int:
+        pivot, p = nums[r], r
+
+        i = l
+        while i < p:
+            if nums[i] > pivot:
+                nums[i], nums[p - 1] = nums[p - 1], nums[i]
+                nums[p], nums[p - 1] = nums[p - 1], nums[p]
+                i -= 1
+                p -= 1
+            i += 1
+
+        return p
+    
+    return quickSelect(nums, 0, len(nums) - 1, len(nums) - k)
+
+nums = [2, 8, 5, 1, 4, 6, 7, 3, 0, 9]
+for k in range(1,10):
+    kthLargest = findKthLargest(nums, k)
+    suffix = "st" if (k == 1) else "nd" if (k == 2) else "rd" if (k == 3) else "th"
+    print(str(k) + suffix + " largest = " + str(nums[kthLargest]))
+
+
+Deque:
+# Stack
+print("=== deque used as a stack ===")
+s = deque()
+s.append(1); print(s)
+s.append(2); print(s)
+s.append(3); print(s)
+s.pop(); print(s)
+s.pop(); print(s)
+
+# Queue
+print("=== deque used as a queue ===")
+q = deque()
+q.append(1); print(q)
+q.append(2); print(q)
+q.append(3); print(q)
+q.popleft(); print(q)
+q.popleft(); print(q)
+ 
+# LinkedList
+print("=== deque used as a linked list ===")
+ll = deque()
+ll.append(1); print(ll)
+ll.append(2); print(ll)
+ll.appendleft(0); print(ll)
+ll.pop(); print(ll)
+ll.popleft(); print(ll)
+
+
+
+
+
+
+
+
+
+
+
+
